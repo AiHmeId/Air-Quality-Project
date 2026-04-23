@@ -6,75 +6,87 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 
 
-def load_and_preprocess(filepath='../data/urban_air_quality.csv', target='AQI_Target'):
+def load_and_preprocess(filepath='../data/urban_air_quality.csv',
+                        target='Health_Risk_Score'):
     """
-    Loads the UrbanAirNet dataset, imputes missing values, encodes categoricals,
-    scales numeric features, and returns a chronological train/test split.
+    Loads the air quality/weather dataset, cleans and encodes all columns,
+    scales numeric features, and returns a chronological 80/20 train/test split.
 
     Args:
         filepath (str): Path to the CSV dataset.
-        target (str): Name of the target column (default: 'AQI_Target').
+        target (str): Name of the target column (default: 'Health_Risk_Score').
 
     Returns:
         X_train, X_test, y_train, y_test, feature_names
-        - X_train / X_test: numpy arrays (scaled)
-        - y_train / y_test: numpy arrays (target values)
-        - feature_names: list of column names used as features
+        - X_train / X_test : numpy arrays (scaled)
+        - y_train / y_test : numpy arrays (target values)
+        - feature_names    : list of column names used as features
     """
 
-    # ── 1. Load dataset ──────────────────────────────────────────────────────
+    # ── 1. Load ───────────────────────────────────────────────────────────────
     df = pd.read_csv(filepath)
-    print(f"[preprocessing] Raw data shape: {df.shape}")
+    print(f"[preprocessing] Raw shape: {df.shape}  |  Target: '{target}'")
 
-    # ── 2. Drop columns with >40% missing values ─────────────────────────────
-    threshold = 0.4
-    missing_fraction = df.isnull().mean()
-    cols_to_drop = missing_fraction[missing_fraction > threshold].index.tolist()
-    if cols_to_drop:
-        print(f"[preprocessing] Dropping {len(cols_to_drop)} high-missingness columns: {cols_to_drop}")
-    df = df.drop(columns=cols_to_drop)
+    # ── 2. Sort chronologically by datetime (keeps temporal ordering) ─────────
+    if 'datetime' in df.columns:
+        df['datetime'] = pd.to_datetime(df['datetime'])
+        df = df.sort_values('datetime').reset_index(drop=True)
 
-    # ── 3. Impute remaining numeric missing values with column median ─────────
-    numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-    if target in numeric_cols:
-        numeric_cols.remove(target)
-    for col in numeric_cols:
-        if df[col].isnull().any():
+    # ── 3. Drop pure-text / high-cardinality / leakage columns ───────────────
+    drop_always = [
+        'datetime', 'datetimeEpoch',   # temporal identifiers
+        'sunrise', 'sunset',            # time strings (epoch versions kept)
+        'sunriseEpoch', 'sunsetEpoch',  # correlated with datetime → leakage
+        'description',                  # free-text
+        'stations',                     # high-cardinality station list strings
+        'source',                       # data-source tag, not a feature
+        'precip',                       # precipprob + precipcover already capture this
+    ]
+    df = df.drop(columns=[c for c in drop_always if c in df.columns])
+
+    # ── 4. Drop columns with >40% missing values ──────────────────────────────
+    miss = df.isnull().mean()
+    high_miss = miss[miss > 0.4].index.tolist()
+    if high_miss:
+        print(f"[preprocessing] Dropping high-missingness cols: {high_miss}")
+    df = df.drop(columns=high_miss)
+
+    # ── 5. Encode low-cardinality categoricals ────────────────────────────────
+    cat_encode = ['City', 'Season', 'Day_of_Week', 'conditions', 'icon', 'preciptype']
+    for col in cat_encode:
+        if col in df.columns:
+            df[col] = df[col].fillna('Unknown').astype('category').cat.codes
+
+    # ── 6. Encode boolean ─────────────────────────────────────────────────────
+    if 'Is_Weekend' in df.columns:
+        df['Is_Weekend'] = df['Is_Weekend'].astype(int)
+
+    # ── 7. Impute remaining numeric missing values with column median ──────────
+    for col in df.select_dtypes(include=[np.number]).columns:
+        if col != target and df[col].isnull().any():
             df[col] = df[col].fillna(df[col].median())
 
-    # ── 4. Encode station_id (categorical → integer codes) ───────────────────
-    if 'station_id' in df.columns:
-        df['station_id'] = df['station_id'].astype('category').cat.codes
-
-    # ── 5. Drop non-feature columns (datetime, identifiers) ──────────────────
-    drop_candidates = ['timestamp', 'date', 'datetime', 'time', 'Date', 'Datetime']
-    drop_cols = [c for c in drop_candidates if c in df.columns]
-    if drop_cols:
-        print(f"[preprocessing] Dropping identifier columns: {drop_cols}")
-    df = df.drop(columns=drop_cols)
-
-    # ── 6. Separate features and target ──────────────────────────────────────
+    # ── 8. Separate features and target ───────────────────────────────────────
     if target not in df.columns:
-        raise ValueError(f"Target column '{target}' not found in dataset. "
-                         f"Available columns: {list(df.columns)}")
+        raise ValueError(
+            f"Target '{target}' not found. Available columns: {list(df.columns)}")
+
     X = df.drop(columns=[target])
     y = df[target]
     feature_names = X.columns.tolist()
-    print(f"[preprocessing] Features: {len(feature_names)}  |  Samples: {len(y):,}")
+    print(f"[preprocessing] Features used: {len(feature_names)}  |  Samples: {len(y):,}")
+    print(f"[preprocessing] Feature list: {feature_names}")
 
-    # ── 7. Scale numeric features with StandardScaler ────────────────────────
+    # ── 9. Scale with StandardScaler ──────────────────────────────────────────
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # ── 8. Chronological 80/20 split (NO shuffle — respects time ordering) ───
+    # ── 10. Chronological 80/20 split (NO random shuffle) ────────────────────
     split_idx = int(len(X_scaled) * 0.8)
-    X_train = X_scaled[:split_idx]
-    X_test  = X_scaled[split_idx:]
-    y_train = y.values[:split_idx]
-    y_test  = y.values[split_idx:]
+    X_train, X_test = X_scaled[:split_idx], X_scaled[split_idx:]
+    y_train, y_test = y.values[:split_idx], y.values[split_idx:]
 
-    print(f"[preprocessing] Train: {X_train.shape[0]:,} rows  |  Test: {X_test.shape[0]:,} rows")
+    print(f"[preprocessing] Train rows: {X_train.shape[0]:,}  |  Test rows: {X_test.shape[0]:,}")
     return X_train, X_test, y_train, y_test, feature_names
