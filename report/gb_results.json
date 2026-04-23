@@ -1,0 +1,14 @@
+{
+  "model": "Gradient Boosting",
+  "best_n_estimators": 500,
+  "best_learning_rate": 0.1,
+  "mae": 0.1458,
+  "rmse": 0.1871,
+  "top_5_features": [
+    "dew",
+    "Severity_Score",
+    "windgust",
+    "Heat_Index",
+    "windspeed"
+  ]
+}
