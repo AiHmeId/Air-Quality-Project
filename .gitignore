@@ -21,9 +21,7 @@ env/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Generated report files (kept locally)
-report/figures/*.png
-report/*.json
+# report/figures and *.json are committed (model outputs needed for report)
 
 # OS files
 .DS_Store
