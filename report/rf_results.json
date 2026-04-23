@@ -1,0 +1,14 @@
+{
+  "model": "Random Forest",
+  "best_n_estimators": 100,
+  "best_max_depth": "15",
+  "mae": 0.1583,
+  "rmse": 0.2157,
+  "top_5_features": [
+    "dew",
+    "windgust",
+    "Severity_Score",
+    "tempmax",
+    "windspeed"
+  ]
+}
