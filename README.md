@@ -103,6 +103,38 @@ jupyter notebook
 
 ---
 
+## 📝 Final Report
+
+**File:** `Machine Learning Group.docx` | **Template:** IJCAI-25 conference format
+**Authors:** Ahmed Deraz (24046227) · John Davies (24024782) — UWE Bristol
+
+### Report Sections
+
+| Section | Author | Content |
+|:--------|:-------|:--------|
+| Abstract | Ahmed | ≤200 words — problem, data, 3 models, key result |
+| 1. Introduction | Ahmed | Problem definition, 3 aims, results overview |
+| 2. Related Work | John | Critical appraisal of 3 papers (Madan 2020, Martinez 2018, Ruby 2024) |
+| 3. Data | Ahmed | Dataset justification, preprocessing steps, chronological split |
+| 4. Methods | John | LR + RF + GB + alternatives considered + eval protocol + ethics |
+| 5. Experiments | John | Results table + CV tuning table + 4 figures + full analysis |
+| 6. Conclusion | John | Summary + implications + limitations + future work |
+| References | John | 3 papers with full DOIs/URLs |
+
+### What Was Added for Spec Compliance (70%+)
+
+| Addition | Spec Requirement Met |
+|:---------|:--------------------|
+| Section 4.1 — Alternatives Considered (SVR, KNN, MLP) | *"understanding of alternative methods"* |
+| Dataset justification (why UrbanAirNet vs UCI) | *"clear justification of selecting datasets"* |
+| Table 2 — CV tuning results for all hyperparameters | *"fully justified methodology"* |
+| Conclusion implications paragraph | *"implications of results"* |
+| DOI/URL added to Madan (2020) reference | References complete |
+| DOI added to Ruby (2024) reference | References complete |
+
+
+
+
 ## 🔁 Git Workflow
 
 | Branch | Purpose | Status |
