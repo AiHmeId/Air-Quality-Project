@@ -1,0 +1,6 @@
+{
+  "model": "Linear Regression",
+  "mae": 0.1079,
+  "rmse": 0.1326,
+  "note": "Baseline"
+}
