@@ -1,7 +1,6 @@
 # Urban Air Quality Prediction Using Machine Learning
 
 **Module:** UFCFAS-15-2 Machine Learning | **Group Project**
-**Submitted:** 1 May 2026 | **University of the West of England**
 
 ## 👥 Team
 
