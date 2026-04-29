@@ -1,23 +1,28 @@
 # Urban Air Quality Prediction Using Machine Learning
 
-**Module:** Machine Learning (UFCFAS-15-2) | **Group Project**
-**Final submission deadline:** 1 May 2026 by 17:00
+**Module:** UFCFAS-15-2 Machine Learning | **Group Project**
+**Submitted:** 1 May 2026 | **University of the West of England**
 
 ## 👥 Team
 
-| Name | Role |
-|:-----|:-----|
-| Ahmed Deraz | Project Lead · EDA · Preprocessing · Linear Regression · Random Forest |
-| John | Gradient Boosting · Comparison Notebook · Report Writing & Assembly |
+| Name | Student ID | Role |
+|:-----|:-----------|:-----|
+| Ahmed Deraz | 24046227 | Project Lead · EDA · Preprocessing · Linear Regression · Random Forest |
+| John Davies | 24024782 | Gradient Boosting · Comparison Notebook · Report Writing & Assembly |
 
 ---
 
 ## 📋 Project Overview
 
-Predicts the **Health Risk Score** using environmental and weather data from the UrbanAirNet dataset (Kaggle). We compare three scikit-learn models:
-1. Linear Regression (baseline) — MAE=0.1079, RMSE=0.1326
-2. Random Forest Regressor
-3. Gradient Boosting Regressor
+Predicts the **Health Risk Score** using environmental and weather data from the UrbanAirNet dataset (Kaggle). Three scikit-learn regression models are compared:
+
+| Model | MAE | RMSE | Result |
+|:------|:----|:-----|:-------|
+| Linear Regression *(baseline)* | 0.1079 | 0.1326 | ✅ Best |
+| Random Forest | 0.1583 | 0.2157 | — |
+| Gradient Boosting | 0.1458 | 0.1871 | — |
+
+> **Key finding:** Linear Regression outperformed both ensemble methods, indicating a strong linear relationship between features and the target variable. Ensemble methods underperformed due to the small dataset size (1,000 records) and distributional shift from chronological splitting.
 
 ---
 
@@ -26,22 +31,38 @@ Predicts the **Health Risk Score** using environmental and weather data from the
 ```
 Air-Quality-Project/
 ├── data/
-│   └── urban_air_quality.csv      # Kaggle dataset (NOT committed to git)
+│   └── urban_air_quality.csv           # Kaggle dataset (NOT committed — download manually)
 ├── notebooks/
-│   ├── 01_eda_preprocessing.ipynb
-│   ├── 02_linear_regression.ipynb
-│   ├── 03_random_forest.ipynb
-│   ├── 04_gradient_boosting.ipynb
-│   └── 05_evaluation_comparison.ipynb
+│   ├── 01_eda_preprocessing.ipynb      # Ahmed — EDA, 4 figures
+│   ├── 02_linear_regression.ipynb      # Ahmed — Baseline model (MAE=0.1079)
+│   ├── 03_random_forest.ipynb          # Ahmed — RF model (MAE=0.1583)
+│   ├── 04_gradient_boosting.ipynb      # John  — GB model (MAE=0.1458)
+│   └── 05_evaluation_comparison.ipynb  # John  — All 3 models comparison + bar chart
 ├── src/
-│   ├── preprocessing.py           # Shared preprocessing pipeline (Ahmed)
-│   ├── rf_model.py                # Random Forest model helpers (Ahmed)
-│   └── gb_model.py                # Gradient Boosting model helpers (John)
+│   ├── preprocessing.py                # Ahmed — Shared preprocessing pipeline
+│   ├── rf_model.py                     # Ahmed — Random Forest helpers
+│   └── gb_model.py                     # John  — Gradient Boosting helpers
 ├── report/
-│   ├── figures/                   # All saved plots
-│   ├── lr_results.json            # Ahmed
-│   ├── rf_results.json            # Ahmed
-│   └── gb_results.json            # John
+│   ├── figures/                        # All saved plots (14 PNG files)
+│   │   ├── missing_values.png
+│   │   ├── target_distribution.png
+│   │   ├── risk_over_time.png
+│   │   ├── correlation_heatmap.png
+│   │   ├── lr_scatter.png
+│   │   ├── lr_timeseries.png
+│   │   ├── lr_coefficients.png
+│   │   ├── rf_feature_importance.png
+│   │   ├── rf_scatter.png
+│   │   ├── rf_timeseries.png
+│   │   ├── gb_feature_importance.png
+│   │   ├── gb_scatter.png
+│   │   ├── gb_timeseries.png
+│   │   └── model_comparison.png
+│   ├── ahmed_sections.md               # Ahmed's report sections (Abstract, Intro, Data)
+│   ├── lr_results.json                 # Ahmed — LR results
+│   ├── rf_results.json                 # Ahmed — RF results
+│   └── gb_results.json                 # John  — GB results
+├── SPRINT_JOHN_FINAL.md                # John's final sprint guide
 ├── requirements.txt
 └── README.md
 ```
@@ -62,43 +83,44 @@ pip install -r requirements.txt
 # Download from Kaggle: UrbanAirNet Urban Air Quality and Weather Dataset
 # Save as: data/urban_air_quality.csv
 
-# 4. Launch Jupyter
+# 4. Run notebooks in order
 jupyter notebook
+# Run: 01 → 02 → 03 → 04 → 05
 ```
 
 ---
 
 ## 📊 Dataset
 
-**UrbanAirNet: Urban Air Quality and Weather Dataset** (Kaggle)
-- 1,000 daily records across 10 US cities (Sep 2024 – Sep 2025)
-- 46 raw features → 33 after preprocessing
-- Cities: Chicago, Dallas, Houston, Los Angeles, New York City, Philadelphia, Phoenix, San Antonio, San Diego, San Jose
-- Target variable: `Health_Risk_Score` (continuous, range 8.49–11.49)
-- Split: chronological 80/20 (800 train / 200 test)
+**UrbanAirNet: Urban Air Quality and Weather Dataset** (Kaggle, 2024)
+- **Records:** 1,000 daily records (Sep 2024 – Sep 2025)
+- **Cities:** 10 US cities — Chicago, Dallas, Houston, Los Angeles, New York City, Philadelphia, Phoenix, San Antonio, San Diego, San Jose
+- **Raw features:** 46 → **33 after preprocessing** (dropped 2 high-missingness cols, encoded 6 categoricals)
+- **Target:** `Health_Risk_Score` (continuous, range 8.49–11.49, mean 9.73)
+- **Split:** Chronological 80/20 — 800 train / 200 test (no data leakage)
 
-> ⚠️ The dataset file (`data/urban_air_quality.csv`) is **not committed** to this repository due to file size. Each team member must download it from Kaggle.
+> ⚠️ `data/urban_air_quality.csv` is **not committed** to this repo. Download from Kaggle and place it in the `data/` folder before running notebooks.
 
 ---
 
 ## 🔁 Git Workflow
 
-| Branch | Owner | Purpose |
-|:-------|:------|:--------|
-| `main` | Ahmed | Final snapshot only |
-| `dev` | Both | Integration branch |
-| `feature/ahmed-data-baseline` | Ahmed | EDA + preprocessing + LR ✅ |
-| `feature/ahmed-random-forest` | Ahmed | Random Forest model |
-| `feature/john-gb-evaluation` | John | Gradient Boosting + Comparison |
+| Branch | Purpose | Status |
+|:-------|:--------|:-------|
+| `main` | Final submission snapshot | ✅ Up to date |
+| `dev` | Integration branch | ✅ Up to date |
+| `feature/ahmed-data-baseline` | EDA + preprocessing + LR | ✅ Merged |
+| `feature/ahmed-random-forest` | Random Forest model | ✅ Merged |
 
 ---
 
-## 📅 Key Dates
+## 📅 Project Timeline
 
-| Milestone | Date |
-|:----------|:-----|
-| Proposal submitted | 13 Mar 2026 ✅ |
-| EDA + Linear Regression baseline | 9 Apr 2026 ✅ |
-| All models complete | 17 Apr 2026 |
-| Report draft complete | 26 Apr 2026 |
-| **Final submission** | **1 May 2026 by 17:00** |
+| Milestone | Owner | Date | Status |
+|:----------|:------|:-----|:-------|
+| Proposal submitted | Team | 13 Mar 2026 | ✅ Done |
+| EDA + Linear Regression | Ahmed | 9 Apr 2026 | ✅ Done |
+| Random Forest | Ahmed | 23 Apr 2026 | ✅ Done |
+| Gradient Boosting | John | 23 Apr 2026 | ✅ Done |
+| Report written | Both | 29 Apr 2026 | ✅ Done |
+| **Final submission** | Ahmed | **1 May 2026 17:00** | ⬜ Pending |
